@@ -1,6 +1,7 @@
-wordcloud==1.9.3
+wordcloud
 streamlit 
 pandas
 matplotlib
 plotly
 numpy
+openpyxl

@@ -3,5 +3,5 @@ pandas
 matplotlib
 plotly
 numpy
-wordcloud
+wordcloud==1.9.3
 random

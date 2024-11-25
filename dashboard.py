@@ -91,7 +91,9 @@ with st.sidebar:
         # st.cache_data.clear()
         st.rerun()
     
-    
+# *** Hint for users
+st.info("You can expand the sidebar to select two brands for more detailed comparison", icon = '⚠️')
+
 # *** brand average scores
 with st.container(border = True):
     st.markdown("<h3 style='text-align: center; '>Overall Comparison</h3>", unsafe_allow_html=True)

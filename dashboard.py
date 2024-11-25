@@ -92,9 +92,14 @@ with st.sidebar:
     brand1 = st.selectbox("Choose the first brand", st.session_state['brands'] + ['All'], index = 13)
     brand2 = st.selectbox("Choose the second brand", st.session_state['brands'] + ['All'], index = 16)
 
-    if st.button('Refresh', type = 'primary',  icon = ':material/restart_alt:'):
-        st.cache_data.clear()
-        st.rerun()
+    b1, b2 = st.columns(2)
+    with b1:
+        if st.button('Reload', type = 'secondary'):
+            st.cache_data.clear()
+            st.rerun()
+    with b2:
+        if st.button('Rerun', type = 'primary'):
+            st.rerun()
     
 # *** Hint for users
 st.info("You can expand the sidebar to select two brands for more detailed comparison", icon = '⚠️')

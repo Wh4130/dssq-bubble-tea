@@ -161,7 +161,7 @@ with st.expander('Raw Data'):
                 st.write(shops[shops['brand'] == brand1])
         with box4_right:
             st.markdown(f"<h6 style='text-align: center; '>{brand2}</h6>", unsafe_allow_html=True)
-            if brand1 == 'All':
+            if brand2 == 'All':
                 st.write(shops)
             else:
                 st.write(shops[shops['brand'] == brand2])

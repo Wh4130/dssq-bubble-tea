@@ -89,8 +89,8 @@ st.session_state['brands'] = ConfigManager.significant_brands()
 
 # *** sidebar
 with st.sidebar:
-    brand1 = st.selectbox("Choose the first brand", st.session_state['brands'] + ['All'], index = 0)
-    brand2 = st.selectbox("Choose the second brand", st.session_state['brands'] + ['All'], index = 2)
+    brand1 = st.selectbox("Choose the first brand", st.session_state['brands'] + ['All'], index = 14)
+    brand2 = st.selectbox("Choose the second brand", st.session_state['brands'] + ['All'], index = 17)
 
     if st.button('Refresh', type = 'primary',  icon = ':material/restart_alt:'):
         st.cache_data.clear()

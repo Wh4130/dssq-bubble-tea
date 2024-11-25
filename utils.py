@@ -88,9 +88,10 @@ class ConfigManager:
             '口味_score': 'The sentiment score of each brand for "flavor" dimension',
             '服務態度_score': 'The sentiment score of each brand for "service attitude" dimension',
             'avg_sentiment': 'The average of "品項 score", "口味 score", "服務態度_score"',
-            'shop count': 'Total number of scraped shops for each brand'
-
-
+            'shop count': 'Total number of scraped shops for each brand',
+            '品項': 'product diversity',
+            '口味': 'flavor',
+            '服務態度': 'service'
         }
 
 

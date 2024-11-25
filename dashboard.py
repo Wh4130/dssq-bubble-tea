@@ -122,7 +122,7 @@ with st.container(border = True):
     st.markdown("<h3 style='text-align: center; '>Comparison for two brands</h3>", unsafe_allow_html=True)
     st.markdown("<h4 style='text-align: center; '>Wordclouds</h4>", unsafe_allow_html=True)
     st.markdown("<span style='text-align: center; '>Select multiple dimensions of interest from below</span>", unsafe_allow_html=True)
-    dims = st.segmented_control(" ", ['品項', '口味', '服務態度'], selection_mode = 'multi', default = '品項')
+    dims = st.segmented_control(" ", ['品項', '口味', '服務態度'], format_func = lambda x: f"{x} ({metric_explanation[x]})", selection_mode = 'multi', default = '品項')
     comments_filtered_by_dims = comments.loc[comments['category'].isin(dims), :].dropna()
     
     if dims != []:

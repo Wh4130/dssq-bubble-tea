@@ -161,7 +161,7 @@ with st.container(border = True):
 
 # *** geographical distribution
     st.markdown("<h3 style='text-align: center; '>Geographical Distribution</h3>", unsafe_allow_html=True)
-    st_folium(PlotManager.init_map(mrt_stations), height = 500, width = 1000)
+    st_folium(PlotManager.init_map(mrt_stations), height = 500, width = 1300)
     
 
 

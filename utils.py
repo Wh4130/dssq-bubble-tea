@@ -189,7 +189,7 @@ class PlotManager:
     @st.cache_data
     def init_map(mrt_stations):
 
-        m = folium.Map(location = [mrt_stations['latitude'].mean(), mrt_stations['longitude'].mean()], width = '100%', height = '100%', zoom_start = 11)
+        m = folium.Map(location = [mrt_stations['latitude'].mean(), mrt_stations['longitude'].mean() + 0.1], width = '100%', height = '100%', zoom_start = 11)
         
         for index, row in mrt_stations.iterrows():
             folium.CircleMarker(

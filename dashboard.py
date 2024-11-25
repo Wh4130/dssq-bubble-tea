@@ -152,21 +152,35 @@ with st.container(border = True):
 with st.expander('Raw Data'):
     with st.container(key = 'dfs'):
         st.markdown("<h3 style='text-align: center; '>Shops</h3>", unsafe_allow_html=True)
-        box4_left, box4_right = st.columns((1/2, 1/2))
-        with box4_left:
+        box3_left, box3_right = st.columns((1/2, 1/2))
+        with box3_left:
             st.markdown(f"<h6 style='text-align: center; '>{brand1}</h6>", unsafe_allow_html=True)
             if brand1 == 'All':
                 st.write(shops)
             else:
                 st.write(shops[shops['brand'] == brand1])
-        with box4_right:
+        with box3_right:
             st.markdown(f"<h6 style='text-align: center; '>{brand2}</h6>", unsafe_allow_html=True)
             if brand2 == 'All':
                 st.write(shops)
             else:
                 st.write(shops[shops['brand'] == brand2])
         st.markdown("<h3 style='text-align: center; '>Comments</h3>", unsafe_allow_html=True)
-        st.write(comments)
+        box4_left, box4_right = st.columns(2)
+        with box4_left:
+            st.markdown(f"<h6 style='text-align: center; '>{brand1}</h6>", unsafe_allow_html=True)
+            if brand1 == 'All':
+                st.write(comments)
+            else:
+                st.write(comments[comments['brand'] == brand1])
+        with box4_right:
+            st.markdown(f"<h6 style='text-align: center; '>{brand2}</h6>", unsafe_allow_html=True)
+            if brand2 == 'All':
+                st.write(comments)
+            else:
+                st.write(comments[comments['brand'] == brand2])
+
+
         st.markdown("<h3 style='text-align: center; '>Brands</h3>", unsafe_allow_html=True)
         st.write(brands)
 

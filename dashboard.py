@@ -109,6 +109,7 @@ st.info("You can expand the sidebar to select two brands for more detailed compa
 # *** brand average scores
 with st.container(border = True):
     st.markdown("<h3 style='text-align: center; '>Overall Comparison</h3>", unsafe_allow_html=True)
+    st.markdown("<span style='text-align: center; '>Select one metric for comparison</span>", unsafe_allow_html=True)
     metric = st.segmented_control(" ", ['average_rating', '品項_score', '口味_score', '服務態度_score', 'avg_sentiment', 'shop count'], format_func = lambda x: x.replace("_", " ").replace("avg", "average"), default = 'average_rating')
     if metric is not None:
         st.caption(metric_explanation[metric])
@@ -120,6 +121,7 @@ with st.container(border = True):
 with st.container(border = True):
     st.markdown("<h3 style='text-align: center; '>Comparison for two brands</h3>", unsafe_allow_html=True)
     st.markdown("<h4 style='text-align: center; '>Wordclouds</h4>", unsafe_allow_html=True)
+    st.markdown("<span style='text-align: center; '>Select multiple dimensions of interest from below</span>", unsafe_allow_html=True)
     dims = st.segmented_control(" ", ['品項', '口味', '服務態度'], selection_mode = 'multi', default = '品項')
     comments_filtered_by_dims = comments.loc[comments['category'].isin(dims), :].dropna()
     

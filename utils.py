@@ -37,12 +37,12 @@ class ConfigManager:
     
     @st.cache_data
     def get_shop_data():
-        shops = pd.read_excel('./processed_shops_info.xlsx').drop('Unnamed: 0', axis = 1)
+        shops = pd.read_excel('./files/processed_shops_info.xlsx').drop('Unnamed: 0', axis = 1)
         return shops
 
     @st.cache_data()
     def get_comment_data():
-        return pd.read_excel('./processed_comments_with_shops.xlsx').drop('Unnamed: 0', axis = 1)
+        return pd.read_excel('./files/processed_comments_with_shops.xlsx').drop('Unnamed: 0', axis = 1)
     
     @st.cache_data
     def get_brand_data(shop_data):

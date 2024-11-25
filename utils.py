@@ -5,6 +5,8 @@ import streamlit as st
 import numpy as np
 from wordcloud import WordCloud
 import random
+from streamlit_folium import st_folium
+import folium
 
 class ConfigManager:
 
@@ -57,6 +59,17 @@ class ConfigManager:
                                         'avg_sentiment': 'mean'}).reset_index().rename(columns = {'name': 'shop count'})
         brands = brands.loc[brands['brand'] != 'Other']
         return brands
+    
+    @st.cache_data
+    def get_mrt_data():
+        df = pd.read_excel('./files/mrt_stations.xlsx', engine = 'openpyxl')
+        df = df.rename(columns = {
+            '出入口名稱': 'name_exit',
+            '出入口編號': 'exit',
+            '經度': 'longitude',
+            '緯度': 'latitude', 
+        }).drop(['是否為無障礙用', '項次'], axis = 1)
+        return df
 
     def significant_brands() -> list:
         return ["CoCo", "Other", "珍煮丹", "鶴茶樓", 
@@ -171,3 +184,31 @@ class PlotManager:
         picked = df.loc[idx, ['text', 'name']]
         return f"{picked['text']} ({picked['name']})"
     #  f"{picked['text'] (picked['name'])}"
+
+    @staticmethod
+    @st.cache_data
+    def init_map(mrt_stations):
+
+        m = folium.Map(location = [mrt_stations['latitude'].mean(), mrt_stations['longitude'].mean()], width = '100%', height = '100%', zoom_start = 11)
+        
+        for index, row in mrt_stations.iterrows():
+            folium.CircleMarker(
+                location=[row['latitude'], row['longitude']],
+                stroke=False,
+                radius=3.2,
+                fill=True,
+                fill_opacity=0.6,
+                fill_color='black',
+                tooltip=folium.Tooltip(
+                    f"{row['name_exit']}", style = f"color:{row['line']}",  sticky = True)
+            ).add_to(m)
+
+        return m
+
+    @staticmethod
+    @st.cache_data
+    def add_shops_to_map(shops, brand):
+        pass
+        # ** filter 
+        # ** use brand-color map to determine colors
+        

@@ -6,3 +6,5 @@ plotly
 numpy
 openpyxl
 statsmodels
+streamlit-folium
+folium

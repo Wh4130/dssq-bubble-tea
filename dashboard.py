@@ -1,10 +1,14 @@
 import streamlit as st
+from streamlit_folium import st_folium
+from folium.plugins import MarkerCluster
+import folium
 import pandas as pd 
 import numpy as np
 import matplotlib.pyplot as plt
 import streamlit as st
 from wordcloud import WordCloud
 import plotly.express as px
+
 
 from utils import (
     ConfigManager,
@@ -69,6 +73,7 @@ with st.spinner("Loading data..."):
     comments = ConfigManager.get_comment_data()
     brands = ConfigManager.get_brand_data(shops)
     metric_explanation = ConfigManager.metric_explanation()
+    mrt_stations = ConfigManager.get_mrt_data()
 
 # *** get utils and set session states
 st.session_state['brand_color_mapping'] = ConfigManager.brand_color_mapping()
@@ -88,11 +93,18 @@ with st.sidebar:
     brand2 = st.selectbox("Choose the second brand", st.session_state['brands'] + ['All'], index = 2)
 
     if st.button('Refresh', type = 'primary',  icon = ':material/restart_alt:'):
-        # st.cache_data.clear()
+        st.cache_data.clear()
         st.rerun()
     
 # *** Hint for users
 st.info("You can expand the sidebar to select two brands for more detailed comparison", icon = '⚠️')
+
+# st.map(data = mrt_stations, latitude = 'latitude', longitude = 'longtitude')
+
+        
+
+
+
 
 # *** brand average scores
 with st.container(border = True):
@@ -146,6 +158,11 @@ with st.container(border = True):
     with box1_right:
         fig_box1_right = PlotManager.rating_regplot(shops, brand2, brand2)
         event = st.plotly_chart(fig_box1_right, on_select = 'rerun', key = 'right')
+
+# *** geographical distribution
+    st.markdown("<h3 style='text-align: center; '>Geographical Distribution</h3>", unsafe_allow_html=True)
+    st_folium(PlotManager.init_map(mrt_stations), height = 500, width = 1000)
+    
 
 
 # *** raw data tables

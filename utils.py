@@ -44,6 +44,7 @@ class ConfigManager:
     def get_comment_data():
         df = pd.read_excel('./files/processed_comments_with_shops.xlsx').drop('Unnamed: 0', axis = 1)
         df['processed_comments'] = df['processed_comments'].astype(str)
+        df['text'] = df['text'].astype(str)
         return df
     
     @st.cache_data

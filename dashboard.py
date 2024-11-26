@@ -109,8 +109,6 @@ st.info("You can expand the sidebar to select two brands for more detailed compa
         
 
 
-
-
 # *** brand average scores
 with st.container(border = True):
     st.markdown("<h3 style='text-align: center; '>Overall Comparison</h3>", unsafe_allow_html=True)
@@ -168,7 +166,11 @@ with st.container(border = True):
 
 # *** geographical distribution
     st.markdown("<h3 style='text-align: center; '>Geographical Distribution</h3>", unsafe_allow_html=True)
-    st_folium(PlotManager.init_map(mrt_stations), height = 500, width = 1300)
+    st.caption(f"size: average sentiment score | blue dots: {brand1} | red dots:  {brand2}")
+    m = PlotManager.init_map(mrt_stations)
+    m = PlotManager.add_shops_to_map(m, shops, brand1, 'blue')
+    m = PlotManager.add_shops_to_map(m, shops, brand2, 'red')
+    st_folium(m, height = 500, width = 1300)
     
 
 

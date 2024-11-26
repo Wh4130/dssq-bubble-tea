@@ -39,7 +39,7 @@ class ConfigManager:
     
     @st.cache_data
     def get_shop_data():
-        shops = pd.read_excel('./files/processed_shops_info.xlsx').drop('Unnamed: 0', axis = 1)
+        shops = pd.read_excel('./files/processed_shops_info.xlsx')
         return shops
 
     @st.cache_data()
@@ -194,13 +194,13 @@ class PlotManager:
         
         for index, row in mrt_stations.iterrows():
             folium.CircleMarker(
-                location=[row['latitude'], row['longitude']],
-                stroke=False,
-                radius=3.2,
-                fill=True,
-                fill_opacity=0.6,
-                fill_color='black',
-                tooltip=folium.Tooltip(
+                location = [row['latitude'], row['longitude']],
+                stroke = False,
+                radius = 3.2,
+                fill = True,
+                fill_opacity = 0.6,
+                fill_color = 'black',
+                tooltip = folium.Tooltip(
                     f"{row['name_exit']}", style = f"color:{row['line']}",  sticky = True)
             ).add_to(m)
 
@@ -208,7 +208,22 @@ class PlotManager:
 
     @staticmethod
     @st.cache_data
-    def add_shops_to_map(shops, brand):
+    def add_shops_to_map(_m, shops, brand, color):
+        
+        shops = shops.loc[shops['brand'] == brand, :]
+        for index, row in shops.iterrows():
+            folium.CircleMarker(
+                location = [row['latitude'], row['longitude']],
+                stroke = False,
+                radius = row['avg_sentiment'] * 2.2,
+                fill = True,
+                fill_opacity = 0.9,
+                fill_color = color,
+                tooltip = folium.Tooltip(
+                    f"{row['name']}", style = f"color:{color}",  sticky = True)
+            ).add_to(_m)
+        
+        return _m
         pass
         # ** filter 
         # ** use brand-color map to determine colors

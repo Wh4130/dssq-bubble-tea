@@ -207,7 +207,6 @@ class PlotManager:
         return m
 
     @staticmethod
-    @st.cache_data
     def add_shops_to_map(_m, shops, brand, color):
         
         shops = shops.loc[shops['brand'] == brand, :]

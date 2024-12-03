@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import streamlit as st
 from wordcloud import WordCloud
 import plotly.express as px
+import statsmodels.api as sm
 
 
 from utils import (
@@ -120,6 +121,8 @@ with st.container(border = True):
     else:
         st.warning("Please select one metric", icon = '⚠️')
 
+
+
 # *** wordclouds 
 with st.container(border = True):
     st.markdown("<h3 style='text-align: center; '>Comparison for two brands</h3>", unsafe_allow_html=True)
@@ -166,12 +169,14 @@ with st.container(border = True):
 
 # *** geographical distribution
     st.markdown("<h3 style='text-align: center; '>Geographical Distribution</h3>", unsafe_allow_html=True)
-    st.caption(f"size: average sentiment score | blue dots: {brand1} | red dots:  {brand2}")
+    st.caption(f"size: average rating | blue dots: {brand1} | red dots:  {brand2}")
     m = PlotManager.init_map(mrt_stations)
     m = PlotManager.add_shops_to_map(m, shops, brand1, 'blue')
     m = PlotManager.add_shops_to_map(m, shops, brand2, 'red')
     st_folium(m, height = 500, width = 1300)
     
+
+
 
 
 # *** raw data tables

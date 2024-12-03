@@ -41,7 +41,9 @@ class ConfigManager:
     @st.cache_data
     def get_shop_data():
         shops = pd.read_excel('./files/processed_shops_info.xlsx')
-        return shops
+        shops_mrt_dist = pd.read_csv('./files/shop_closest_mrt.csv')
+
+        return pd.merge(shops, shops_mrt_dist, on = 'id')
 
     @st.cache_data()
     def get_comment_data():
@@ -94,6 +96,31 @@ class ConfigManager:
             '口味': 'flavor',
             '服務態度': 'service'
         }
+    
+    def remove_outliers(df, column, multiplier=1.5):
+        """
+        使用 IQR 方法移除 DataFrame 中的離群值。
+        
+        參數:
+            df (pd.DataFrame): 原始資料表
+            column (str): 要檢查離群值的列名
+            multiplier (float): IQR 的倍數，決定離群值的範圍，預設為 1.5
+        
+        返回:
+            pd.DataFrame: 移除離群值後的資料表
+        """
+        # 計算四分位數
+        Q1 = df[column].quantile(0.25)
+        Q3 = df[column].quantile(0.75)
+        IQR = Q3 - Q1
+
+        # 計算上下限
+        lower_bound = Q1 - multiplier * IQR
+        upper_bound = Q3 + multiplier * IQR
+
+        # 篩選非離群值的數據
+        filtered_df = df[(df[column] >= lower_bound) & (df[column] <= upper_bound)]
+        return filtered_df
 
 
 class PlotManager:
@@ -125,7 +152,7 @@ class PlotManager:
                 title = title,
                 hover_name = 'name'
             )
-        fig.update_traces(marker = dict(size = 8, color = st.session_state['brand_color_mapping'][brand]))
+        fig.update_traces(marker = dict(size = 4.5, color = st.session_state['brand_color_mapping'][brand]))
         fig.update_layout(title_x = 0.45)
 
         # * vertical line for the median of average_rating
@@ -133,7 +160,7 @@ class PlotManager:
               x0 = stat.median(data['average_rating']), 
               y0 = 0, 
               x1 = stat.median(data['average_rating']), 
-              y1 = 5,
+              y1 = 4,
               line = dict(
                     color = "Red",
                     width = 2,
@@ -143,7 +170,7 @@ class PlotManager:
 
         # * horizontal line for the median of avg_sentiment
         fig.add_shape(type="line",
-              x0 = 0, 
+              x0 = 2, 
               y0 = stat.median(data['avg_sentiment']), 
               x1 = 5, 
               y1 = stat.median(data['avg_sentiment']),
@@ -246,7 +273,7 @@ class PlotManager:
             folium.CircleMarker(
                 location = [row['latitude'], row['longitude']],
                 stroke = False,
-                radius = row['avg_sentiment'] * 2.2,
+                radius = row['average_rating'] * 2.2,
                 fill = True,
                 fill_opacity = 0.9,
                 fill_color = color,

@@ -8,7 +8,7 @@ st.session_state['brands'] = ConfigManager.significant_brands()
 data = ConfigManager.get_comment_data()
 
 with st.sidebar:
-    brand = st.selectbox("Choose the first brand", st.session_state['brands'] + ['All'], index = 13)
+    brand = st.selectbox("Choose the brand", st.session_state['brands'] + ['All'], index = 13)
     
 df_wordcloud = PlotManager.worcdloud_generate(data, brand)[0]
 st.subheader("Wordcloud counts")

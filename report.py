@@ -4,6 +4,7 @@ from utils import PlotManager, ConfigManager
 import pandas as pd
 
 # Config
+st.session_state['brands'] = ConfigManager.significant_brands()
 data = ConfigManager.get_comment_data()
 
 with st.sidebar:

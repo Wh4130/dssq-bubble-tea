@@ -137,14 +137,14 @@ with st.container(border = True):
                 st.markdown(f"<h6 style='text-align: center; '>{brand1}</h6>", unsafe_allow_html=True)
                 with st.container(height = 100):
                     st.caption(PlotManager.random_pick_comment(comments_filtered_by_dims, brand1))
-                wc_left = PlotManager.worcdloud_generate(comments_filtered_by_dims, brand1)
+                wc_left = PlotManager.worcdloud_generate(comments_filtered_by_dims, brand1)[1]
                 st.pyplot(wc_left)
 
             with box2_right:
                 st.markdown(f"<h6 style='text-align: center; '>{brand2}</h6>", unsafe_allow_html=True)
                 with st.container(height = 100):
                     st.caption(PlotManager.random_pick_comment(comments_filtered_by_dims, brand2))    
-                wc_right = PlotManager.worcdloud_generate(comments_filtered_by_dims, brand2)
+                wc_right = PlotManager.worcdloud_generate(comments_filtered_by_dims, brand2)[1]
                 st.pyplot(wc_right)
 
         box3_left, box3_right = st.columns(2)

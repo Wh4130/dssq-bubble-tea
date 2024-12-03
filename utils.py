@@ -7,6 +7,7 @@ from wordcloud import WordCloud
 import random
 from streamlit_folium import st_folium
 import folium
+import statistics as stat
 
 class ConfigManager:
 
@@ -127,6 +128,32 @@ class PlotManager:
         fig.update_traces(marker = dict(size = 8, color = st.session_state['brand_color_mapping'][brand]))
         fig.update_layout(title_x = 0.45)
 
+        # * vertical line for the median of average_rating
+        fig.add_shape(type="line",
+              x0 = stat.median(data['average_rating']), 
+              y0 = 0, 
+              x1 = stat.median(data['average_rating']), 
+              y1 = 5,
+              line = dict(
+                    color = "Red",
+                    width = 2,
+                    dash = "dot",
+                )
+        )
+
+        # * horizontal line for the median of avg_sentiment
+        fig.add_shape(type="line",
+              x0 = 0, 
+              y0 = stat.median(data['avg_sentiment']), 
+              x1 = 5, 
+              y1 = stat.median(data['avg_sentiment']),
+              line = dict(
+                    color = "Red",
+                    width = 1.5,
+                    dash = "dot",
+                )
+        )
+
         return fig
     
     @staticmethod
@@ -165,12 +192,17 @@ class PlotManager:
             # mask = mask
         ).generate(text)
 
+
         fig, ax = plt.subplots(1, 1)
         ax.imshow(wordcloud, interpolation = 'bilinear')
         ax.axis('off')
         fig.patch.set_alpha(0)
 
-        return fig
+        counts_data = pd.DataFrame(columns = ["word", "count"])
+        for word, count in wordcloud.words_.items():
+            counts_data.loc[len(counts_data), ['word', 'count']] = [word, count]
+
+        return counts_data, fig
     
     @staticmethod
     def random_pick_comment(df, brand):

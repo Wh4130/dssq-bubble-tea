@@ -52,7 +52,7 @@ st.subheader("Results")
 st.markdown("<h4> Average rating & Average sentiment</h4>", unsafe_allow_html=True)
 
 st.write('''
-In order to verify the hypothesis, we conduct ordinary least square regression for the rescaled average sentiment scores on the rating score across shop. The sentiment scores is calculated for all comments then grouped by "shop id" to calculate the average as the proxy of shop level scores; the rating score is directly scraped with **selenium** package from google review. To ensure the robustness, we have removed outliers for both variables using IQR method with multiplier as 1.5.''')
+In order to verify the hypothesis, we conduct ordinary least square regression for the rescaled average sentiment scores on the rating score across shop. The sentiment scores is calculated for all comments then grouped by "shop id" to calculate the average as the proxy of shop level scores; the rating score is directly scraped with **selenium** package from google review. To ensure the robustness, we have removed outliers for both variables using IQR method with multiplier 1.5.''')
 
 st.latex(r'AverageSentiment = \beta_0 + \beta_1 * AverageRating')
 st.latex(r'H_0: \beta_1 = 0; H_1: \beta_1 \neq 0')
@@ -60,7 +60,7 @@ st.latex(r'H_0: \beta_1 = 0; H_1: \beta_1 \neq 0')
 st.write('''Our null hypothesis posits that Google Map ratings do not accurately reflect people's sentiment toward bubble tea shops, while the alternative hypothesis asserts that Google Map ratings do represent comment sentiment. To test this, we perform an OLS regression with shop-level sentiment as the dependent variable and shop rating as the independent variable.       
 ''')
 
-reg1_plot, reg1_table = st.columns((0.55, 0.45))
+reg1_table, reg1_plot = st.columns((0.45, 0.55))
 
 with reg1_plot:
     data_reg1 = ConfigManager.remove_outliers(shops, "avg_sentiment", 1.5)

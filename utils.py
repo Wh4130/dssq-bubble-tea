@@ -132,18 +132,24 @@ class PlotManager:
     
     @staticmethod
     def rating_regplot(shops, brand, title):
+        data = shops.copy()
+        data['inconsistent'] = 'False'
+        data.loc[(data['average_rating'] > data['average_rating'].median()) & (data['avg_sentiment'] < data['avg_sentiment'].median()), 'inconsistent'] = 'True'
+        data.loc[(data['average_rating'] < data['average_rating'].median()) & (data['avg_sentiment'] > data['avg_sentiment'].median()), 'inconsistent'] = 'True'
+
         if (brand == 'All'):
-            data = shops
             fig = px.scatter(
                 data,
                 'average_rating',
                 'avg_sentiment',
                 trendline = 'ols',
+                trendline_scope = 'overall',
                 title = title,
-                hover_name = 'name'
+                hover_name = 'name',
+                color = 'inconsistent'
             )
         else:
-            data = shops[shops['brand'] == brand]
+            data = data[data['brand'] == brand]
             fig = px.scatter(
                 data,
                 'average_rating',
@@ -152,7 +158,8 @@ class PlotManager:
                 title = title,
                 hover_name = 'name'
             )
-        fig.update_traces(marker = dict(size = 4.5, color = st.session_state['brand_color_mapping'][brand]))
+            fig.update_traces(marker = dict(size = 4.5, color = st.session_state['brand_color_mapping'][brand]))
+    
         fig.update_layout(title_x = 0.45)
 
         # * vertical line for the median of average_rating

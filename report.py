@@ -53,7 +53,7 @@ st.subheader("Results")
 st.markdown("<h4> Average rating & Average sentiment</h4>", unsafe_allow_html=True)
 
 st.write('''
-In order to verify the hypothesis, we conduct ordinary least square regression for the rescaled average sentiment scores on the rating score across shop. The sentiment scores is calculated for all comments then grouped by "shop id" to calculate the average as the proxy of shop level scores; the rating score is directly scraped with **selenium** package from google review. To ensure the robustness, we have removed outliers for both variables using IQR method with multiplier 1.5.''')
+In order to verify our main hypothesis, we conduct ordinary least square regression for the rescaled average sentiment scores on the rating score across shop. The sentiment scores is calculated for all comments then grouped by "shop id" to calculate the average as the proxy of shop level scores; the rating score is directly scraped with **selenium** package from google review. To ensure the robustness, we have removed outliers for both variables using IQR method with multiplier 1.5.''')
 
 st.latex(r'AverageSentiment = \beta_0 + \beta_1 * AverageRating')
 st.latex(r'H_0: \beta_1 = 0; H_1: \beta_1 \neq 0')

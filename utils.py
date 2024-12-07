@@ -1,6 +1,7 @@
 import pandas as pd 
 import matplotlib.pyplot as plt
 import plotly.express as px
+import plotly.graph_objects as go
 import streamlit as st
 import numpy as np
 from wordcloud import WordCloud
@@ -42,8 +43,13 @@ class ConfigManager:
     def get_shop_data():
         shops = pd.read_excel('./files/processed_shops_info.xlsx')
         shops_mrt_dist = pd.read_csv('./files/shop_closest_mrt.csv')
+        shops = pd.merge(shops, shops_mrt_dist, on = 'id', how = 'left')
 
-        return pd.merge(shops, shops_mrt_dist, on = 'id')
+        shops['inconsistent'] = 0
+        shops.loc[(shops['average_rating'] - shops['average_rating'].median()) * (shops['avg_sentiment'] - shops['avg_sentiment'].median()) >= 0, 'inconsistent'] = 'False'
+        shops.loc[(shops['average_rating'] - shops['average_rating'].median()) * (shops['avg_sentiment'] - shops['avg_sentiment'].median()) < 0, 'inconsistent'] = 'True'
+
+        return shops
 
     @st.cache_data()
     def get_comment_data():
@@ -54,13 +60,23 @@ class ConfigManager:
     
     @st.cache_data
     def get_brand_data(shop_data):
-        brands =  shop_data.groupby('brand').agg({'name': 'count',
+        data = shop_data.copy()
+        data['inconsistent'] = data['inconsistent'].apply(lambda x: 1 if x == 'True' else 0)
+        data['rating_var'] = data['average_rating']
+        brands = data.groupby('brand').agg({'name': 'count',
                                         'average_rating': 'mean',
+                                        'rating_var': 'var',
                                         '品項_score': 'mean',
                                         '口味_score': 'mean',
                                         '服務態度_score': 'mean',
-                                        'avg_sentiment': 'mean'}).reset_index().rename(columns = {'name': 'shop count'})
+                                        'avg_sentiment': 'mean',
+                                        'inconsistent': 'sum'}).reset_index().rename(columns = {'name': 'shop count'})
         brands = brands.loc[brands['brand'] != 'Other']
+        brands['incons_prop'] = brands['inconsistent'] / brands['shop count']
+        brands['consistent'] = brands['shop count'] - brands['inconsistent']
+
+        brands['cons_prop'] = round((1 - brands["incons_prop"]) * 100, 0).astype(str) + "%"
+        brands['incons_prop'] = round((brands["incons_prop"]) * 100, 0).astype(str) + "%"
         return brands
     
     @st.cache_data
@@ -90,7 +106,7 @@ class ConfigManager:
             '品項_score': 'The sentiment score of each brand for "product diversity" dimension',
             '口味_score': 'The sentiment score of each brand for "flavor" dimension',
             '服務態度_score': 'The sentiment score of each brand for "service attitude" dimension',
-            'avg_sentiment': 'The average of "品項 score", "口味 score", "服務態度_score"',
+            'avg_sentiment': 'The average sentiment score of each brand',
             'shop count': 'Total number of scraped shops for each brand',
             '品項': 'product diversity',
             '口味': 'flavor',
@@ -132,12 +148,14 @@ class PlotManager:
     
     @staticmethod
     def rating_regplot(shops, brand, title):
-        data = shops.copy()
-        data['inconsistent'] = 'False'
-        data.loc[(data['average_rating'] > data['average_rating'].median()) & (data['avg_sentiment'] < data['avg_sentiment'].median()), 'inconsistent'] = 'True'
-        data.loc[(data['average_rating'] < data['average_rating'].median()) & (data['avg_sentiment'] > data['avg_sentiment'].median()), 'inconsistent'] = 'True'
+        # data = shops.copy()
+        # data['inconsistent'] = 'False'
+        # data.loc[(data['average_rating'] > data['average_rating'].median()) & (data['avg_sentiment'] < data['avg_sentiment'].median()), 'inconsistent'] = 'True'
+        # data.loc[(data['average_rating'] < data['average_rating'].median()) & (data['avg_sentiment'] > data['avg_sentiment'].median()), 'inconsistent'] = 'True'
 
         if (brand == 'All'):
+            
+            data = shops.copy()
             fig = px.scatter(
                 data,
                 'average_rating',
@@ -148,45 +166,98 @@ class PlotManager:
                 hover_name = 'name',
                 color = 'inconsistent'
             )
-        else:
-            data = data[data['brand'] == brand]
-            fig = px.scatter(
-                data,
-                'average_rating',
-                'avg_sentiment',
-                trendline = 'ols',
-                title = title,
-                hover_name = 'name'
+
+            # * vertical line for the median of average_rating
+            fig.add_shape(type="line",
+                x0 = 4.1,       # data['average_rating'].median() = 4.1
+                y0 = 0, 
+                x1 = 4.1, 
+                y1 = 4,
+                line = dict(
+                        color = "Red",
+                        width = 1.5,
+                        dash = "dot",
+                    )
             )
-            fig.update_traces(marker = dict(size = 4.5, color = st.session_state['brand_color_mapping'][brand]))
+
+            # * horizontal line for the median of avg_sentiment
+            fig.add_shape(type="line",
+                x0 = 2, 
+                y0 = data['avg_sentiment'].median(), 
+                x1 = 5, 
+                y1 = data['avg_sentiment'].median(),
+                line = dict(
+                        color = "Red",
+                        width = 1.5,
+                        dash = "dot",
+                    )
+            )
+            
+
+        else:
+            data = shops[shops['brand'] == brand]
+
+            # line_x = np.linspace(min(data['average_rating']), max(data['average_rating']), 100)
+            # coefficients = np.polyfit(data['average_rating'], data['avg_sentiment'], 1)
+            # trend_line = np.poly1d(coefficients)
+            # line_y = trend_line(line_x)
+
+            inconsistent_shops = go.Scatter(
+                x = data.loc[data['inconsistent'] == 'True', 'average_rating'],
+                y = data.loc[data['inconsistent'] == 'True', 'avg_sentiment'],
+                mode = "markers",
+                name = 'inconsistent',
+                marker = dict(
+                    size = 5,
+                    color = 'blue'
+                ),
+                showlegend = True,
+                hoverinfosrc = 'name',
+                text = data.loc[data['inconsistent'] == 'True', 'name']
+            )
+
+            consistent_shops = go.Scatter(
+                x = data.loc[data['inconsistent'] == 'False', 'average_rating'],
+                y = data.loc[data['inconsistent'] == 'False', 'avg_sentiment'],
+                mode = "markers",
+                name = 'consistent',
+                marker = dict(
+                    size = 5,
+                    color = '#84B3F8'
+                ),
+                showlegend = True,
+                text = data.loc[data['inconsistent'] == 'False', 'name']
+            )
+
+            # line_obj = go.Scatter(
+            #     x = line_x,
+            #     y = line_y,
+            #     mode = 'lines',
+            #     name = 'trend line',
+            #     line = dict(
+            #         color = 'red', 
+            #         width = 2
+            #     )
+            # )
+
+            fig = go.Figure(data = [inconsistent_shops, consistent_shops])
+
+            fig.update_layout(title = title)
+            # fig = px.scatter(
+            #     data,
+            #     'average_rating',
+            #     'avg_sentiment',
+            #     trendline = 'ols',
+            #     trendline_scope = 'overall',
+            #     title = title,
+            #     hover_name = 'name',
+            #     color = 'inconsistent'
+            # )
+            # fig.update_traces(marker = dict(size = 4.5))
     
         fig.update_layout(title_x = 0.45)
 
-        # * vertical line for the median of average_rating
-        fig.add_shape(type="line",
-              x0 = stat.median(data['average_rating']), 
-              y0 = 0, 
-              x1 = stat.median(data['average_rating']), 
-              y1 = 4,
-              line = dict(
-                    color = "Red",
-                    width = 2,
-                    dash = "dot",
-                )
-        )
-
-        # * horizontal line for the median of avg_sentiment
-        fig.add_shape(type="line",
-              x0 = 2, 
-              y0 = stat.median(data['avg_sentiment']), 
-              x1 = 5, 
-              y1 = stat.median(data['avg_sentiment']),
-              line = dict(
-                    color = "Red",
-                    width = 1.5,
-                    dash = "dot",
-                )
-        )
+        
 
         return fig
     
@@ -205,7 +276,7 @@ class PlotManager:
             text = ' '.join(data.loc[data['brand'] == brand, 'processed_comments'].astype(str)).replace(' ', ', ')
 
         stopwords = [
-            '店家', '味道', '好喝', '飲料', '店員', '真的', '點餐', '客人', '一杯', '點了', '很多', '發現', 'nan', '每次', '服務態度', '服務', '態度', '一個',
+            '店家', '味道', '好喝', '飲料', '店員', '真的', '點餐', '客人', '一杯', '點了', '很多', '發現', 'nan', '每次', '服務態度', '服務', '態度', '一個', '清心', '現場', '分鐘', '感覺', '飲品', '推薦', '阿彌陀佛',
             brand
         ]
 

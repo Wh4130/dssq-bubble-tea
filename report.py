@@ -1,5 +1,6 @@
 import streamlit as st
 import plotly.express as px
+import plotly.graph_objects as go
 from utils import PlotManager, ConfigManager
 import pandas as pd
 import statsmodels.api as sm
@@ -18,15 +19,15 @@ st.session_state['brand_color_mapping'] = ConfigManager.brand_color_mapping()
 st.session_state['brands'] = ConfigManager.significant_brands()
 
 # todo wordcloud for huihui 
-st.subheader("Wordcloud counts")
-brand = st.selectbox("Choose the brand", st.session_state['brands'] + ['All'], index = 13)
-df_wordcloud = PlotManager.worcdloud_generate(comments, brand)[0]
-l, r = st.columns((0.2, 0.8))
-with l:
-    st.write(df_wordcloud)
-with r:
-    fig = px.bar(df_wordcloud, 'word', 'count')
-    st.plotly_chart(fig)
+# st.subheader("Wordcloud counts")
+# brand = st.selectbox("Choose the brand", st.session_state['brands'] + ['All'], index = 13)
+# df_wordcloud = PlotManager.worcdloud_generate(comments, brand)[0]
+# l, r = st.columns((0.2, 0.8))
+# with l:
+#     st.write(df_wordcloud)
+# with r:
+#     fig = px.bar(df_wordcloud, 'word', 'count')
+#     st.plotly_chart(fig)
 
 
 # *** Introduction
@@ -93,13 +94,99 @@ average_rating     0.1500           0.000
 ''') 
     
 st.write('''The regression analysis indicates a significant and positive correlation between shop-level sentiment scores and shop-level ratings, with a p-value approaching 0. The model's R-squared value is 0.12, suggesting that shop ratings can account for up to 12% of the variation in sentiment scores. This is notably substantial, considering the model includes only a single independent variable.     
+
+Overall, the average rating generally aligns with consumers' perceptions towards the shops. However, a significant number of shops still deviate considerably from the regression line. **To identify these shops, we define observations with high sentiment score and low average rating (or conversely, low sentiment score and high average rating) as "inconsistent" observations.** More specifically, we define the status of inconsistenty as:
 ''')
 
+st.latex(r'C_i = 1\ \ if (R_i - Q_{\frac{1}{2}}(R_i)) \cdot (S_i - Q_{\frac{1}{2}}(S_i)) < 0,\  else \ 0')
 
+st.markdown(r"where *$R_i$* represents the average rating of shop i, *$S_i$* represents the average sentiment of shop i, and *$Q_{\frac{1}{2}}(\cdot)$* being the **median** function.")
+
+st.write(rf"""
+The proportion of *inconsistent* shops is **{round(sum(shops['inconsistent'] == 'True')/len(shops['inconsistent']), 4)}**, and the proportion of inconsistent shops conditional on identified brand is plotted as follow.
+""")
+
+brands = brands[brands['shop count'] > 10]
+bar_incons = go.Bar(
+    name = 'Inconsistent',
+    x = brands["brand"],
+    y = brands["inconsistent"],
+    offsetgroup = 0,
+    text = brands["incons_prop"]
+)
+
+bar_cons = go.Bar(
+    name = 'Consistent',
+    x = brands["brand"],
+    y = brands["consistent"],
+    base = brands["inconsistent"],
+    offsetgroup = 0,
+    text = brands["cons_prop"]
+)
+
+fig_brand_incons = go.Figure(
+    data = [bar_incons, bar_cons],
+    layout = go.Layout(
+        title = f"% of inconsistent shops"
+    ))
+
+fig_brand_incons.update_traces(textposition = 'inside')
+st.plotly_chart(fig_brand_incons)
+
+st.write("""We focus exclusively on brands with a sample size (number of shops) exceeding a predefined threshold of 10. Among these, **50嵐**, one of Taiwan's largest bubble tea brands, stands out for its low inconsistency rate (23%) with the highest shop counts, drawing our attention. Our research reveals that 50嵐 has adopted a direct-selling-focused strategy and maintains stringent standards for granting franchise licenses. Historically, only staff with over a year of experience in any branch were prioritized for franchise opportunities. Currently, the brand has ceased all franchising and operates as a fully direct-selling brand in Taiwan. This approach ensures consistent quality across branches, which may explain its relatively low inconsistency rate.
+""")
+         
+
+# *** Topic Modeling & Wordcloud
+st.markdown("<h4> Topic Modeling & Wordcloud</h4>", unsafe_allow_html=True)
+
+st.write("""
+To gain deeper insights, we applied topic modeling algorithms to identify the key aspects people focus on when discussing bubble tea shops. Both LDA and k-means clustering were tested with \( k = 3 \) and \( k = 4 \). After manual evaluation, the optimal results were achieved using k-means with \( k = 3 \). Considering that people might leave comments with mixed aspects, we allow each comment to be assigned with 2 topics. Finally, we visualize the results by **topic-conditional wordclouds** as follow.
+""")
+
+# comments_filtered_by_dims = comments.loc[comments['category'].isin(dims), :].dropna()
+wc_l, wc_m, wc_r = st.columns(3)
+for i, (placeholder, dim) in enumerate(zip([wc_l, wc_m, wc_r], ['品項', '口味', '服務態度'])):
+    comments_filtered_by_dims = comments.loc[comments['category'].isin([dim]), :].dropna()
+    with placeholder:
+        fig = PlotManager.worcdloud_generate(comments_filtered_by_dims, 'All')[1]
+        st.pyplot(fig)
+        st.caption(f"Topic {i + 1}")
+
+st.write("""
+As shown, topic 1 contains \"珍珠\", \"奶茶\", \"紅茶\", \"奶蓋\", which could be identified as **"product diversity (品項)"**. On the other hand, topic 2 and topic 3 represent similar concepts, both having "親切" with high frequency. We could not identify these two topics quite well, and we can only conclude these two topics associate with "service quality 服務態度".
+         
+The challenge likely stems from the fact that people often leave comments containing mixed concepts. Intuitively, a single comment rarely focuses on just one topic. For instance, someone might praise a shop's drinks while criticizing the service. This inherent nature makes it extremely difficult to achieve clear clustering results. Another contributing factor could be the brevity of the comments and the limited language variety used in bubble tea reviews. When most comments are short and feature similar vocabulary, categorizing them becomes a significant challenge.
+""")
+
+# *** brand level wordcloud
+st.markdown("<h4>Brand level Keyword analysis</h4>", unsafe_allow_html=True)
+st.write("""
+We are also interested in what is being discussed for each brand. Therefore, we conduct **keyword analysis** for some brands of interest. 
+         
+- 50嵐 has a high frequency of the words "珍珠" (small bubbles) and "波霸" (big bubbles), suggesting that the shop is particularly known for its quality bubbles. In addition, "親切" also accounts significantly, which means its service attitude is above level.
+         
+- 龜記 is best known for its "紅柚翡翠" (grapefruit-flavored green tea), which stands out as its signature product and has driven a surge in sales. (It’s also my personal favorite!)
+         
+- 得正 shows the highest frequency for the word "烏龍" (Oolong), which aligns with its market positioning as it initially focused on Oolong tea. The word "排隊" (waiting in line) also appears frequently, consistent with our personal observations—there’s always a queue whenever we buy bubble tea from 得正.
+""")
+
+brand = st.selectbox("Choose the brand", st.session_state['brands'] + ['All'], index = 13)
+wc = PlotManager.worcdloud_generate(comments, brand)
+df_wordcloud = wc[0]
+df_wordcloud = df_wordcloud[df_wordcloud['count'] > df_wordcloud['count'].quantile(0.9)].sort_values('count', ascending = True)
+l, r = st.columns((0.6, 0.4))
+with l:
+    fig = px.bar(df_wordcloud, 'count', 'word', orientation = 'h', height = 480)
+    st.plotly_chart(fig)
+with r:
+    st.pyplot(wc[1])
 
 
 # *** distance & comment / rating counts
 st.markdown("<h4>Distance to the nearest MRT exit & Comment Counts</h4>", unsafe_allow_html=True)
+
+st.write("The scatterplot and regression analysis reveal a weak but statistically significant negative relationship between the distance to the nearest MRT exit and the total number of comments or ratings for bubble tea shops. The R-squared value of 0.023 indicates that the model explains only 2.3% of the variability in comment counts. The coefficient for distance to MRT is -0.1118 (p-value = 0.003), suggesting that for every 1-kilometer increase in distance from an MRT exit, the number of comments decreases by approximately 11. This result highlights that shops located closer to MRT exits tend to receive more customer engagement, as reflected by higher comment counts.")
 
 reg2_l, reg2_r = st.columns((0.55, 0.45))
 
@@ -118,6 +205,8 @@ with reg2_l:
     fig_reg2.update_traces(marker = dict(size = 8, color = 'skyblue', opacity = 0.8))
     fig_reg2.update_layout(title_x = 0.45)
     event = st.plotly_chart(fig_reg2, on_select = 'rerun', key = 'reg2')
+
+
 
 with reg2_r:
     # m2_X = sm.add_constant(data_reg2['distance_to_mrt'])
@@ -145,6 +234,8 @@ distance_to_mrt    -0.1118          0.003
     
 # *** distance & comment / average rating 
 st.markdown("<h4>Distance to the nearest MRT exit & Average Rating</h4>", unsafe_allow_html=True)
+
+st.write("The analysis shows a slight but statistically significant positive correlation between the distance to the nearest MRT exit and the average rating of bubble tea shops. With an R-squared value of 0.030, the model captures just 3% of the variation in average ratings. The coefficient of 0.0004 (p-value = 0.001) suggests that for every additional meter away from an MRT exit, the average rating increases marginally. While the impact is minimal, this could indicate that shops located further from MRT stations tend to receive slightly better ratings.")
 
 reg3_l, reg3_r = st.columns((0.55, 0.45))
 
@@ -190,7 +281,7 @@ distance_to_mrt     0.0004          0.001
 #     mode3_1 = 
 
 
-st.write("DESIGNING")
+
 # *** brand average scores
 # shops = ConfigManager.get_shop_data()
 # brands = ConfigManager.get_brand_data(shops)

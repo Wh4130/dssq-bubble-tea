@@ -143,7 +143,7 @@ class PlotManager:
     @staticmethod
     def brands_barplot(brands, metric):
         fig = px.bar(brands, 'brand', metric, hover_data = ['shop count'])
-        fig.update_traces(marker = dict(color = "#E6DCB9"))
+        # fig.update_traces(marker = dict(color = "#E6DCB9"))
         return fig
     
     @staticmethod

@@ -10,6 +10,7 @@ from streamlit_folium import st_folium
 import folium
 import statistics as stat
 
+
 class ConfigManager:
 
     @st.cache_data()
@@ -48,6 +49,9 @@ class ConfigManager:
         shops['inconsistent'] = 0
         shops.loc[(shops['average_rating'] - shops['average_rating'].median()) * (shops['avg_sentiment'] - shops['avg_sentiment'].median()) >= 0, 'inconsistent'] = 'False'
         shops.loc[(shops['average_rating'] - shops['average_rating'].median()) * (shops['avg_sentiment'] - shops['avg_sentiment'].median()) < 0, 'inconsistent'] = 'True'
+
+        # Inconsistent Example
+        shops.loc[shops['name'] == "50嵐 淡水英專店", 'inconsistent'] = 'Example'
 
         return shops
 
@@ -263,7 +267,7 @@ class PlotManager:
         return fig
     
     @staticmethod
-    def worcdloud_generate(data, brand):
+    def worcdloud_generate(data, brand, width = 300, height = 400):
 
         x, y = np.ogrid[:300, :300]
         mask = (x - 150)**2 + (y - 150)**2 > 150**2
@@ -292,9 +296,9 @@ class PlotManager:
             background_color=None,  # No background color
             mode='RGBA',             # Enable transparency
             font_path='./font.ttf',
-            random_state = 000,
-            width = 300,
-            height = 400
+            random_state = 1214,
+            width = width,
+            height = height
             # mask = mask
         ).generate(text)
 

@@ -4,8 +4,12 @@ import plotly.graph_objects as go
 from utils import PlotManager, ConfigManager
 import pandas as pd
 import statsmodels.api as sm
+from wordcloud import WordCloud
+import matplotlib.pyplot as plt
 
 # *** Config
+plt.rcParams['font.family'] = 'Osaka'
+
 # *** get data
 with st.spinner("Loading data..."):
     shops = ConfigManager.get_shop_data()
@@ -17,17 +21,6 @@ with st.spinner("Loading data..."):
 # *** get utils and set session states
 st.session_state['brand_color_mapping'] = ConfigManager.brand_color_mapping()
 st.session_state['brands'] = ConfigManager.significant_brands()
-
-# todo wordcloud for huihui 
-# st.subheader("Wordcloud counts")
-# brand = st.selectbox("Choose the brand", st.session_state['brands'] + ['All'], index = 13)
-# df_wordcloud = PlotManager.worcdloud_generate(comments, brand)[0]
-# l, r = st.columns((0.2, 0.8))
-# with l:
-#     st.write(df_wordcloud)
-# with r:
-#     fig = px.bar(df_wordcloud, 'word', 'count')
-#     st.plotly_chart(fig)
 
 
 with st.sidebar:
@@ -127,8 +120,43 @@ st.latex(r'IC_i = \mathbb{I}((R_i - Q_{\frac{1}{2}}(R_i)) \cdot (S_i - Q_{\frac{
 
 st.markdown(r"where *$R_i$* represents the average rating of shop i, *$S_i$* represents the average sentiment of shop i, *$Q_{\frac{1}{2}}(\cdot)$* being the **median** function, and *$\mathbb{I}(\cdot)$* being the indicator function.")
 
+# ***** Example of Inconsistent Shop
+incons_l, incons_r = st.columns((0.6, 0.4))
+with incons_l:
+    text = " ".join(comments[comments['name'].str.contains('50嵐 淡水')]['processed_comments']).replace(" ", ",")
+    stopwords = [
+                '店家', '味道', '飲料', '店員', '真的', '點餐', '客人', '一杯', '點了', '很多', '發現', 'nan', '每次', '服務態度', '服務', '態度', '一個', '清心', '現場', '分鐘', '感覺', '飲品', '推薦', "珍珠", "大杯", '紅茶', '中杯', '北投', '黑糖', '評論', '甜度', '無糖', '士林', '巴士', '爆打', '夜市', '荔枝', '檸檬', '時間', '奶茶', '四季春', '五十', '吸管', '波霸'
+            ]
+
+    for word in stopwords:
+        text = text.replace(f"{word}", "")
+
+    # Create and generate a word cloud image:
+    wordcloud = WordCloud(
+        background_color=None,  # No background color
+        mode='RGBA',             # Enable transparency
+        font_path='./font.ttf',
+        random_state = 1214,
+        width = 500,
+        height = 300
+        # mask = mask
+    ).generate(text)
+
+
+    fig, ax = plt.subplots(1, 1)
+    ax.imshow(wordcloud, interpolation = 'bilinear')
+    ax.axis('off')
+    ax.set_title("Example: 50嵐 淡水英專店's wordcloud", color = "gray")
+    fig.patch.set_alpha(0)
+    st.pyplot(fig)
+
+with incons_r:
+    st.write("""We pick several inconsistent shops that deviate the most from the regression line and then visualize their comments using word clouds to explore qualitative evidence for the source of inconsistency. 
+    
+One distinctive example is 50嵐 淡水英專店 (marked as red dot in the scatter plot above), which has a relatively low **average rating of 3.6**, yet a high **average sentiment score of 3.495** is also observed. The wordcloud also shows that it has high frequency of posivite words, such as **好喝, 親切, 很棒**.""")
+
 st.write(rf"""
-The proportion of inconsistent shops is **{round(sum(shops['inconsistent'] == 'True')/len(shops['inconsistent']), 4)}**, and the proportion of inconsistent shops conditional on identified brand is plotted as follow.
+Ovarall, the proportion of inconsistent shops is **{round(sum(shops['inconsistent'] == 'True')/len(shops['inconsistent']), 4)}**, and the proportion of inconsistent shops conditional on identified brand is plotted as follow.
 """)
 
 brands = brands[brands['shop count'] > 10]
@@ -152,7 +180,7 @@ bar_cons = go.Bar(
 fig_brand_incons = go.Figure(
     data = [bar_incons, bar_cons],
     layout = go.Layout(
-        title = f"% of inconsistent shops"
+        title = f"% of inconsistent shops (height of bars: shop counts)"
     ))
 
 fig_brand_incons.update_traces(textposition = 'inside')
@@ -161,7 +189,7 @@ st.plotly_chart(fig_brand_incons)
 st.write("""We focus exclusively on brands with a sample size (number of shops) exceeding a predefined threshold of 10. Among these, **50嵐**, one of Taiwan's largest bubble tea brands, stands out for its low inconsistency rate (23%) with the highest shop counts, drawing our attention. Our research reveals that 50嵐 has adopted a direct-selling-focused strategy and maintains stringent standards for granting franchise licenses. Historically, only staff with over a year of experience in any branch were prioritized for franchise opportunities. Currently, the brand has ceased all franchising and operates as a fully direct-selling brand in Taiwan. This approach ensures consistent quality across branches, which may explain its relatively low inconsistency rate.
 """)
 
-st.info("[TODO] EXAMPLE of inconsistent shop")
+
          
 
 # *** Topic Modeling & Wordcloud
@@ -172,7 +200,6 @@ To gain deeper insights, we applied topic modeling algorithms to identify the ke
 """)
 
 # comments_filtered_by_dims = comments.loc[comments['category'].isin(dims), :].dropna()
-st.info("[TODO] Merge the right two wordclouds into one")
 wc_l, wc_m, wc_r = st.columns(3)
 for i, (placeholder, dim) in enumerate(zip([wc_l, wc_m, wc_r], ['品項', '口味', '服務態度'])):
     comments_filtered_by_dims = comments.loc[comments['category'].isin([dim]), :].dropna()
@@ -181,10 +208,22 @@ for i, (placeholder, dim) in enumerate(zip([wc_l, wc_m, wc_r], ['品項', '口�
         st.pyplot(fig)
         st.caption(f"Topic {i + 1}")
 
-st.write("""
-As shown, topic 1 contains \"珍珠\", \"奶茶\", \"紅茶\", \"奶蓋\", which could be identified as **"product diversity (品項)"**. On the other hand, topic 2 and topic 3 represent similar concepts, both having "親切" with high frequency. We could not identify these two topics quite well, and we can only conclude these two topics associate with "service quality 服務態度".
-         
+st.write("""As shown, topic 1 includes keywords such as "珍珠," "奶茶," "紅茶," and "奶蓋," which can be identified as **"product diversity (品項)"**. On the other hand, topics 2 and 3 share a similar concept, both featuring "親切" with high frequency. These two topics are not clearly distinguishable, and we can only conclude that they are associated with **"service quality (服務態度)"**.
+
 The challenge likely stems from the fact that people often leave comments containing mixed concepts. Intuitively, a single comment rarely focuses on just one topic. For instance, someone might praise a shop's drinks while criticizing the service. This inherent nature makes it extremely difficult to achieve clear clustering results. Another contributing factor could be the brevity of the comments and the limited language variety used in bubble tea reviews. When most comments are short and feature similar vocabulary, categorizing them becomes a significant challenge.
+         
+For a more insightful analysis, we merge topics 2 and 3 and visualize them again. The results provide clearer insights: (new) topic 1 focuses on products and toppings (e.g., 推薦, 排雷), while (new) topic 2 emphasizes service, waiting time, and staff attitude.""")
+
+wc_new_l, wc_new_r = st.columns(2)
+for i, (placeholder, dim_lst) in enumerate(zip([wc_new_l, wc_new_r], [['品項'], ['口味', '服務態度']])):
+    comments_filtered_by_dims = comments.loc[comments['category'].isin(dim_lst), :].dropna()
+    with placeholder:
+        fig = PlotManager.worcdloud_generate(comments_filtered_by_dims, 'All', 300, 200)[1]
+        st.pyplot(fig)
+        st.caption(f"(new) Topic {i + 1}")
+
+st.write("""
+Overall, we conclude that regarding products, "珍珠" (bubble), "奶茶" (milk tea), and "紅茶" (black tea) are the three most prominent items for Taiwanese consumers, followed by "烏龍" (Oolong) and "奶蓋" (cheese foam), which are also popular choices. On the service side, consumers frequently mention "親切" (friendly), suggesting that a welcoming attitude from staff can leave a positive impression and enhance brand favorability.
 """)
 
 # *** brand level wordcloud
@@ -192,7 +231,7 @@ st.markdown("<h4>Brand level Keyword analysis</h4>", unsafe_allow_html=True)
 st.write("""
 We are also interested in what is being discussed for each brand. Therefore, we conduct **keyword analysis** for some brands of interest. 
          
-- 50嵐 has a high frequency of the words "珍珠" (small bubbles) and "波霸" (big bubbles), suggesting that the shop is particularly known for its quality bubbles. In addition, "親切" also accounts significantly, which means its service attitude is above level.
+- 50嵐 has a high frequency of the words "珍珠" (small bubbles) and "波霸" (big bubbles), suggesting that the shop is particularly known for its quality bubbles. In addition, "親切" also accounts significantly, which implies its service attitude might be above level.
          
 - 龜記 is best known for its "紅柚翡翠" (grapefruit-flavored green tea), which stands out as its signature product and has driven a surge in sales. (It’s also my personal favorite!)
          

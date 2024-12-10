@@ -164,7 +164,8 @@ class PlotManager:
                 trendline_scope = 'overall',
                 title = title,
                 hover_name = 'name',
-                color = 'inconsistent'
+                color = 'inconsistent',
+                hover_data = ["total_comment_or_rating_num"]
             )
 
             # * vertical line for the median of average_rating

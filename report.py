@@ -30,27 +30,52 @@ st.session_state['brands'] = ConfigManager.significant_brands()
 #     st.plotly_chart(fig)
 
 
-# *** Introduction
-st.subheader("Introduction")
+with st.sidebar:
+    st.markdown("""
+- Index
+    - [Motivation](#Motivation)
+    - [Hypotheses](#Hypotheses)
+    - [Data Source](#Data_Source)
+    - [Methodology](#Methodology)
+    - [Results](#Results)
+""", unsafe_allow_html = True)
 
-# *** Motivation & Problem Statement
-st.subheader("Motivation & Problem Statement")
-st.write('''
-1. We want to verify the correlation between the rating and consumers' actual opinions about the 
+# *** Motivation
+st.header("Motivation", anchor = "Motivation")
+st.write('Bias in Google Maps ratings has been an ongoing issue in Taiwan, potentially leading viewers to choose overrated restaurants and resulting in negative experiences. As fans of bubble tea, we feel that similar rating bias may also affect Google Maps reviews of bubble tea shops. This has motivated us to analyze and re-rate bubble tea shops to provide more accurate recommendations.')
+st.divider()
 
-         ''')
+# *** Hypothesis
+st.header("Hypotheses", anchor = "Hypotheses")
+
+st.divider()
+
 
 # *** Data Source
-st.subheader("Data Source")
+st.header("Data Source", anchor = "Data_Source")
+st.write("""
+- Google Map API
+- Webscraping""")
+
+st.divider()
 
 # *** Methodology
-st.subheader("Methodology")
+st.header("Methodology", anchor = "Methodology")
+st.write("""
+- Tokenization
+- Topic Modeling (LDA / K-means)
+- Sentiment Analysis (KeyMoji)
+- Wordcloud
+- Simple Linear Regression (OLS)
+""")
+
+st.divider()
 
 # **************************************** Results ****************************************
-st.subheader("Results")
+st.header("Results", anchor = "Results")
 
 # *** average rating & average sentiment
-st.markdown("<h4> Average rating & Average sentiment</h4>", unsafe_allow_html=True)
+st.markdown("<h4> Average rating & Average sentiment</h4>", unsafe_allow_html = True)
 
 st.write('''
 In order to verify our main hypothesis, we conduct ordinary least square regression for the rescaled average sentiment scores on the rating score across shop. The sentiment scores is calculated for all comments then grouped by "shop id" to calculate the average as the proxy of shop level scores; the rating score is directly scraped with **selenium** package from google review. To ensure the robustness, we have removed outliers for both variables using IQR method with multiplier 1.5.''')
@@ -98,12 +123,12 @@ st.write('''The regression analysis indicates a significant and positive correla
 Overall, the average rating generally aligns with consumers' perceptions towards the shops. However, a significant number of shops still deviate considerably from the regression line. **To identify these shops, we define observations with high sentiment score and low average rating (or conversely, low sentiment score and high average rating) as "inconsistent" observations.** More specifically, we define the status of inconsistenty as:
 ''')
 
-st.latex(r'C_i = 1\ \ if (R_i - Q_{\frac{1}{2}}(R_i)) \cdot (S_i - Q_{\frac{1}{2}}(S_i)) < 0,\  else \ 0')
+st.latex(r'IC_i = \mathbb{I}((R_i - Q_{\frac{1}{2}}(R_i)) \cdot (S_i - Q_{\frac{1}{2}}(S_i)) < 0)')
 
-st.markdown(r"where *$R_i$* represents the average rating of shop i, *$S_i$* represents the average sentiment of shop i, and *$Q_{\frac{1}{2}}(\cdot)$* being the **median** function.")
+st.markdown(r"where *$R_i$* represents the average rating of shop i, *$S_i$* represents the average sentiment of shop i, *$Q_{\frac{1}{2}}(\cdot)$* being the **median** function, and *$\mathbb{I}(\cdot)$* being the indicator function.")
 
 st.write(rf"""
-The proportion of *inconsistent* shops is **{round(sum(shops['inconsistent'] == 'True')/len(shops['inconsistent']), 4)}**, and the proportion of inconsistent shops conditional on identified brand is plotted as follow.
+The proportion of inconsistent shops is **{round(sum(shops['inconsistent'] == 'True')/len(shops['inconsistent']), 4)}**, and the proportion of inconsistent shops conditional on identified brand is plotted as follow.
 """)
 
 brands = brands[brands['shop count'] > 10]
@@ -135,6 +160,8 @@ st.plotly_chart(fig_brand_incons)
 
 st.write("""We focus exclusively on brands with a sample size (number of shops) exceeding a predefined threshold of 10. Among these, **50嵐**, one of Taiwan's largest bubble tea brands, stands out for its low inconsistency rate (23%) with the highest shop counts, drawing our attention. Our research reveals that 50嵐 has adopted a direct-selling-focused strategy and maintains stringent standards for granting franchise licenses. Historically, only staff with over a year of experience in any branch were prioritized for franchise opportunities. Currently, the brand has ceased all franchising and operates as a fully direct-selling brand in Taiwan. This approach ensures consistent quality across branches, which may explain its relatively low inconsistency rate.
 """)
+
+st.info("[TODO] EXAMPLE of inconsistent shop")
          
 
 # *** Topic Modeling & Wordcloud
@@ -145,6 +172,7 @@ To gain deeper insights, we applied topic modeling algorithms to identify the ke
 """)
 
 # comments_filtered_by_dims = comments.loc[comments['category'].isin(dims), :].dropna()
+st.info("[TODO] Merge the right two wordclouds into one")
 wc_l, wc_m, wc_r = st.columns(3)
 for i, (placeholder, dim) in enumerate(zip([wc_l, wc_m, wc_r], ['品項', '口味', '服務態度'])):
     comments_filtered_by_dims = comments.loc[comments['category'].isin([dim]), :].dropna()
@@ -288,3 +316,5 @@ distance_to_mrt     0.0004          0.001
 # fig = px.bar(brands, 'brand', '服務態度_score', hover_data = ['shop count'])
 # fig.update_traces(marker = dict(color = '#E6DCB9'))
 # st.plotly_chart(fig)
+    
+

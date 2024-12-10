@@ -1,5 +1,8 @@
 # Taiwanese Drink Shop Free Research
 
+#### Link to our streamlit app
+https://dssq-bubble-tea-m9jzmospevfsw8uh2ncz4o.streamlit.app/
+
 ## Files
 ### `report.py` (UI)
 This page contains the complete content of our research, including motivation, data collection, methodology, and results.

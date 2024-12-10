@@ -101,6 +101,8 @@ with st.sidebar:
     with b2:
         if st.button('Rerun', type = 'primary'):
             st.rerun()
+
+    st.markdown('<a href="https://github.com/Wh4130/dssq-bubble-tea">Github Repo</a>', unsafe_allow_html = True)
     
 # *** Hint for users
 st.info("You can expand the sidebar to select two brands for more detailed comparison", icon = '⚠️')

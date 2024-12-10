@@ -31,6 +31,7 @@ with st.sidebar:
     - [Data Source](#Data_Source)
     - [Methodology](#Methodology)
     - [Results](#Results)
+- <a href="https://github.com/Wh4130/dssq-bubble-tea">Github Repo</a>
 """, unsafe_allow_html = True)
 
 # *** Motivation

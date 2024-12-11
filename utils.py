@@ -51,7 +51,10 @@ class ConfigManager:
         shops.loc[(shops['average_rating'] - shops['average_rating'].median()) * (shops['avg_sentiment'] - shops['avg_sentiment'].median()) < 0, 'inconsistent'] = 'True'
 
         # Inconsistent Example
-        shops.loc[shops['name'] == "50嵐 淡水英專店", 'inconsistent'] = 'Example'
+        shops.loc[shops['name'] == "50嵐 淡水英專店", 'inconsistent'] = 'Incons. Example'
+
+        # Consistent Example
+        shops.loc[shops['name'] == "萬波島嶼紅茶 Wanpo Tea Shop 台北大安店", 'inconsistent'] = 'Cons. Example'
 
         return shops
 

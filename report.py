@@ -122,11 +122,12 @@ st.latex(r'IC_i = \mathbb{I}((R_i - Q_{\frac{1}{2}}(R_i)) \cdot (S_i - Q_{\frac{
 st.markdown(r"where *$R_i$* represents the average rating of shop i, *$S_i$* represents the average sentiment of shop i, *$Q_{\frac{1}{2}}(\cdot)$* being the **median** function, and *$\mathbb{I}(\cdot)$* being the indicator function.")
 
 # ***** Example of Inconsistent Shop
-incons_l, incons_r = st.columns((0.6, 0.4))
-with incons_l:
+incons_u, cons_u = st.columns((0.5, 0.5))
+incons_d, cons_d = st.columns((0.5, 0.5))
+with incons_u:
     text = " ".join(comments[comments['name'].str.contains('50嵐 淡水')]['processed_comments']).replace(" ", ",")
     stopwords = [
-                '店家', '味道', '飲料', '店員', '真的', '點餐', '客人', '一杯', '點了', '很多', '發現', 'nan', '每次', '服務態度', '服務', '態度', '一個', '清心', '現場', '分鐘', '感覺', '飲品', '推薦', "珍珠", "大杯", '紅茶', '中杯', '北投', '黑糖', '評論', '甜度', '無糖', '士林', '巴士', '爆打', '夜市', '荔枝', '檸檬', '時間', '奶茶', '四季春', '五十', '吸管', '波霸'
+                '店家', '味道', '飲料', '店員', '真的', '點餐', '客人', '一杯', '點了', '很多', '發現', 'nan', '每次', '服務態度', '服務', '態度', '一個', '清心', '現場', '分鐘', '感覺', '飲品', '推薦', "珍珠", "大杯", '紅茶', '中杯', '北投', '黑糖', '評論', '甜度', '無糖', '士林', '巴士', '爆打', '夜市', '荔枝', '檸檬', '時間', '奶茶', '四季春', '五十', '吸管', '波霸', '萬波'
             ]
 
     for word in stopwords:
@@ -148,14 +149,54 @@ with incons_l:
         fig, ax = plt.subplots(1, 1)
         ax.imshow(wordcloud, interpolation = 'bilinear')
         ax.axis('off')
-        ax.set_title("Example: 50嵐 淡水英專店's wordcloud", color = "gray")
+        ax.set_title("Example wordcloud of inconsistent shop", color = "gray")
         fig.patch.set_alpha(0)
         st.pyplot(fig)
 
-with incons_r:
+
+with incons_d:
     st.write("""We pick several inconsistent shops that deviate the most from the regression line and then visualize their comments using word clouds to explore qualitative evidence for the source of inconsistency. 
     
 One distinctive example is 50嵐 淡水英專店 (marked as red dot in the scatter plot above), which has a relatively low **average rating of 3.6**, yet a high **average sentiment score of 3.495** is also observed. The wordcloud also shows that it has high frequency of posivite words, such as **好喝, 親切, 很棒**.""")
+    
+# ***** Example of Consistent Shop
+with cons_u:
+    text = " ".join(comments[comments['name'].str.contains('Tea Shop 台北大安')]['processed_comments']).replace(" ", ",")
+    stopwords = [
+                '店家', '味道', '飲料', '店員', '真的', '點餐', '客人', '一杯', '點了', '很多', '發現', 'nan', '每次', '服務態度', '服務', '態度', '一個', '清心', '現場', '分鐘', '感覺', '飲品', '推薦', "珍珠", "大杯", '紅茶', '中杯', '北投', '黑糖', '評論', '甜度', '無糖', '士林', '巴士', '爆打', '夜市', '荔枝', '檸檬', '時間', '奶茶', '四季春', '五十', '吸管', '波霸', '萬波', '喝過', '這家'
+            ]
+
+    for word in stopwords:
+        text = text.replace(f"{word}", "")
+
+    # Create and generate a word cloud image:
+    with st.spinner("Loading wordclouds..."):
+        wordcloud = WordCloud(
+            background_color=None,  # No background color
+            mode='RGBA',             # Enable transparency
+            font_path='./font.ttf',
+            random_state = 1214,
+            width = 500,
+            height = 300
+            # mask = mask
+        ).generate(text)
+
+
+        fig, ax = plt.subplots(1, 1)
+        ax.imshow(wordcloud, interpolation = 'bilinear')
+        ax.axis('off')
+        ax.set_title("Example wordcloud of consistent shop", color = "gray")
+        fig.patch.set_alpha(0)
+        st.pyplot(fig)
+
+with cons_d:
+    st.write("""On the other hand, we also analyze examples for consistent shops. 
+             
+An intriguing example is **萬波島嶼紅茶 台北大安店**, which stands out with both a low average rating **(2.8)** and a low average sentiment score **(2.55)**. Consistent with these ratings, the word cloud reveals a high frequency of terms like **"糟糕"** (terrible) and **"收一收"** (having pessimistic view about the shop's future), accurately reflecting its poor performance in Google Maps reviews.
+
+
+""")
+# ----
 
 st.write(rf"""
 Ovarall, the proportion of inconsistent shops is **{round(sum(shops['inconsistent'] == 'True')/len(shops['inconsistent']), 4)}**, and the proportion of inconsistent shops conditional on identified brand is plotted as follow.

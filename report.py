@@ -36,20 +36,61 @@ with st.sidebar:
 
 # *** Motivation
 st.header("Motivation", anchor = "Motivation")
-st.write('Bias in Google Maps ratings has been an ongoing issue in Taiwan, potentially leading viewers to choose overrated restaurants and resulting in negative experiences. As fans of bubble tea, we feel that similar rating bias may also affect Google Maps reviews of bubble tea shops. This has motivated us to analyze and re-rate bubble tea shops to provide more accurate recommendations.')
+st.write('''Bias in Google Maps ratings has been an ongoing issue in Taiwan, potentially leading viewers to choose overrated restaurants and resulting in negative experiences. As fans of bubble tea, we feel that similar rating bias may also affect Google Maps reviews of bubble tea shops. This has motivated us to analyze and re-rate bubble tea shops to provide more accurate recommendations. This project's main purpose is **to verify whether bubble tea shops' rating actually reflects people's view which we measures by the average sentiment score of comments per shop. **''')
 st.divider()
 
 # *** Hypothesis
 st.header("Hypotheses", anchor = "Hypotheses")
+st.write('''
+1. Our **main hypothesis** focuses on the existance of the correlation between actual rating and average sentiment score: 
+         
+    The null hypothesis posits that Google Map ratings do not accurately reflect people's sentiment toward bubble tea shops, while the alternative hypothesis asserts that Google Map ratings do represent comment sentiment. To test this, we perform an OLS regression with **shop-level sentiment** as the dependent variable **y** and **average shop rating** as the independent variable **x**.
+    ''')
+st.latex(r'AverageSentiment_i = \beta_0 + \beta_1 * AverageRating_i')
+st.latex(r'H_0: \beta_1 = 0; H_1: \beta_1 \neq 0')
 
+st.write('''
+2. Comments can be grouped into various topics, such as flavor, product variety, or service attitude. 
+         
+    To investigate this, we apply topic modeling techniques like **k-means** and **LDA**, along with keyword analysis tools such as **word clouds**, to qualitatively explore this idea.
+''')
+
+st.write('''
+3. Comments exhibit distinct characteristics across different brands.  
+
+   To explore this, we conduct keyword analysis for each brand and qualitatively identify features that align with our daily observations.
+''')
+
+st.write('''
+4. The distance to MRT station has negative impact on total comment (or rating) counts:
+    
+    We assume that people tend to consume in the shops near stations, so we expect to observe a negative relationship between MRT station and total comment (or rating) counts.
+''')
+st.latex(r'TotalCount_i = \beta_0 + \beta_1 * Dist_i')
+st.latex(r'H_0: \beta_1 = 0; H_1: \beta_1 < 0')
+st.write('''
+5. Proximity to MRT stations positively impacts average ratings:  
+
+   We assume that the closer a shop is to an MRT station, the higher the consumer traffic. Consequently, an increase in the number of consumers may reasonably lead to a rise in negative scores.
+''')
+st.latex(r'AverageRating_i = \beta_0 + \beta_1 * Dist_i')
+st.latex(r'H_0: \beta_1 = 0; H_1: \beta_1 > 0')
 st.divider()
+
+
 
 
 # *** Data Source
 st.header("Data Source", anchor = "Data_Source")
 st.write("""
-- Google Map API
-- Webscraping""")
+Regarding the data source, we focus on bubble tea shops located near MRT stations in Taipei City and New Taipei City. By **near**, we refer to shops situated within a 1-kilometer radius of each MRT station.
+
+- Google Map API:
+         
+    We start with collecting shop level data. We query all bubble tea shops that fulfill our standard (within 1-kilometer radius of MRT station) by **Google Map API** to get these shops' **id**, **longitude**, and **latitude**.
+- Webscraping:
+         
+    Using the complete dataset of shops, we can collect comment data through **web scraping** using the Selenium package in Python. For each shop, we send requests to open the Google Maps page by embedding the shop's **ID** into the URL, set the comment order to "most recent," scroll down 30 times, and then extract all available comment texts from the HTML source code.""")
 
 st.divider()
 
@@ -74,11 +115,6 @@ st.markdown("<h4> Average rating & Average sentiment</h4>", unsafe_allow_html = 
 st.write('''
 In order to verify our main hypothesis, we conduct ordinary least square regression for the rescaled average sentiment scores on the rating score across shop. The sentiment scores is calculated for all comments then grouped by "shop id" to calculate the average as the proxy of shop level scores; the rating score is directly scraped with **selenium** package from google review. To ensure the robustness, we have removed outliers for both variables using IQR method with multiplier 1.5.''')
 
-st.latex(r'AverageSentiment = \beta_0 + \beta_1 * AverageRating')
-st.latex(r'H_0: \beta_1 = 0; H_1: \beta_1 \neq 0')
-
-st.write('''Our null hypothesis posits that Google Map ratings do not accurately reflect people's sentiment toward bubble tea shops, while the alternative hypothesis asserts that Google Map ratings do represent comment sentiment. To test this, we perform an OLS regression with shop-level sentiment as the dependent variable and shop rating as the independent variable.       
-''')
 
 reg1_table, reg1_plot = st.columns((0.45, 0.55))
 
@@ -402,3 +438,15 @@ distance_to_mrt     0.0004          0.001
 # st.plotly_chart(fig)
     
 
+
+# *** raw data tables
+with st.expander('Raw Data'):
+    with st.container(key = 'dfs'):
+        st.markdown("<h3 style='text-align: center; '>Shops</h3>", unsafe_allow_html=True)
+        st.write(shops)
+
+        st.markdown("<h3 style='text-align: center; '>Comments</h3>", unsafe_allow_html=True)
+        st.write(comments)
+
+        st.markdown("<h3 style='text-align: center; '>Brands</h3>", unsafe_allow_html=True)
+        st.write(brands)

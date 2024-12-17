@@ -178,7 +178,7 @@ class PlotManager:
             # * vertical line for the median of average_rating
             fig.add_shape(type="line",
                 x0 = 4.1,       # data['average_rating'].median() = 4.1
-                y0 = 0, 
+                y0 = 2, 
                 x1 = 4.1, 
                 y1 = 4,
                 line = dict(

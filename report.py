@@ -319,7 +319,7 @@ We are also interested in what is being discussed for each brand. Therefore, we 
 """)
 
 brand = st.selectbox("Choose the brand", st.session_state['brands'] + ['All'], index = 13)
-wc = PlotManager.worcdloud_generate(comments, brand, width = 600)
+wc = PlotManager.worcdloud_generate(comments, brand)
 df_wordcloud = wc[0]
 df_wordcloud = df_wordcloud[df_wordcloud['count'] > df_wordcloud['count'].quantile(0.9)].sort_values('count', ascending = True)
 l, r = st.columns((0.6, 0.4))

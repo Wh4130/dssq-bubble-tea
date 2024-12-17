@@ -288,20 +288,20 @@ with st.spinner("Loading wordclouds..."):
             st.pyplot(fig)
             st.caption(f"Topic {i + 1}")
 
-st.write('''As shown, topic 1 includes keywords such as "珍珠," "奶茶," "紅茶," and "奶蓋," which can be identified as **"product diversity (品項)"**. On the other hand, topics 2 and 3 share a similar concept, both featuring "親切" with high frequency. These two topics are not clearly distinguishable, and we can only conclude that they are associated with "service quality (服務態度)".
+st.write('''As shown, topic 1 includes keywords such as "珍珠," "奶茶," "紅茶," and "奶蓋," which can be identified as **"product diversity (品項)"**. Topic 2, on the other hand, features "親切", "服務好" with high frequency, therefore we conclude it to be "service quality (服務態度)". However, as for topic 3, we have difficulty distinguish it from the other two topics, and topic 3 seems to be like the mixture of topic 1 and topic 2.
 
 The challenge likely stems from the fact that people often leave comments containing mixed concepts. Intuitively, a single comment rarely focuses on just one topic. For instance, someone might praise a shop's drinks while criticizing the service. This inherent nature makes it extremely difficult to achieve clear clustering results. Another contributing factor could be the brevity of the comments and the limited language variety used in bubble tea reviews. When most comments are short and feature similar vocabulary, categorizing them becomes a significant challenge.
         
-For a more insightful analysis, we merge topics 2 and 3 and visualize them again. The results provide clearer insights: (new) topic 1 focuses on products and toppings (e.g., 推薦, 排雷), while (new) topic 2 emphasizes service, waiting time, and staff attitude.''')
+We focus on topic 1 and topic 2''')
 
-wc_new_l, wc_new_r = st.columns(2)
-with st.spinner("Loading wordclouds..."):
-    for i, (placeholder, dim_lst) in enumerate(zip([wc_new_l, wc_new_r], [['品項'], ['口味', '服務態度']])):
-        comments_filtered_by_dims = comments.loc[comments['category'].isin(dim_lst), :].dropna()
-        with placeholder:
-            fig = PlotManager.worcdloud_generate(comments_filtered_by_dims, 'All', 300, 200)[1]
-            st.pyplot(fig)
-            st.caption(f"(new) Topic {i + 1}")
+# wc_new_l, wc_new_r = st.columns(2)
+# with st.spinner("Loading wordclouds..."):
+#     for i, (placeholder, dim_lst) in enumerate(zip([wc_new_l, wc_new_r], [['品項'], ['口味', '服務態度']])):
+#         comments_filtered_by_dims = comments.loc[comments['category'].isin(dim_lst), :].dropna()
+#         with placeholder:
+#             fig = PlotManager.worcdloud_generate(comments_filtered_by_dims, 'All', 300, 200)[1]
+#             st.pyplot(fig)
+#             st.caption(f"(new) Topic {i + 1}")
 
 st.write("""
 Overall, we conclude that regarding products, "珍珠" (bubble), "奶茶" (milk tea), and "紅茶" (black tea) are the three most prominent items for Taiwanese consumers, followed by "烏龍" (Oolong) and "奶蓋" (cheese foam), which are also popular choices. On the service side, consumers frequently mention "親切" (friendly), suggesting that a welcoming attitude from staff can leave a positive impression and enhance brand favorability.

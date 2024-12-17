@@ -10,6 +10,8 @@ from wordcloud import WordCloud
 import plotly.express as px
 import statsmodels.api as sm
 
+st.title("Dashboard")
+
 
 from utils import (
     ConfigManager,

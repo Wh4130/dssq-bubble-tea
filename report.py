@@ -288,11 +288,10 @@ with st.spinner("Loading wordclouds..."):
             st.pyplot(fig)
             st.caption(f"Topic {i + 1}")
 
-st.write('''As shown, topic 1 includes keywords such as "珍珠," "奶茶," "紅茶," and "奶蓋," which can be identified as **"product diversity (品項)"**. Topic 2, on the other hand, features "親切", "服務好" with high frequency, therefore we conclude it to be "service quality (服務態度)". However, as for topic 3, we have difficulty distinguish it from the other two topics, and topic 3 seems to be like the mixture of topic 1 and topic 2.
+st.write('''As shown, topic 1 includes keywords such as "珍珠," "奶茶," "紅茶," and "奶蓋," which can be identified as **"product diversity (品項)"**. Topic 2, on the other hand, features "親切", "服務好" with high frequency, therefore we conclude it to be "service quality (服務態度)". However, as for topic 3, we have difficulty distinguish it from the other two topics, and topic 3 seems to be like the mixture of topic 1 and topic 2. Consequently, we focus on topic 1 and topic 2.
 
-The challenge likely stems from the fact that people often leave comments containing mixed concepts. Intuitively, a single comment rarely focuses on just one topic. For instance, someone might praise a shop's drinks while criticizing the service. This inherent nature makes it extremely difficult to achieve clear clustering results. Another contributing factor could be the brevity of the comments and the limited language variety used in bubble tea reviews. When most comments are short and feature similar vocabulary, categorizing them becomes a significant challenge.
-        
-We focus on topic 1 and topic 2''')
+The challenge likely stems from the fact that people often leave comments containing mixed concepts. Intuitively, a single comment rarely focuses on just one topic. For instance, someone might praise a shop's drinks while criticizing the service. This inherent nature makes it extremely difficult to achieve clear clustering results. Another contributing factor could be the brevity of the comments and the limited language variety used in bubble tea reviews. When most comments are short and feature similar vocabulary, categorizing them becomes a significant challenge.       
+''')
 
 # wc_new_l, wc_new_r = st.columns(2)
 # with st.spinner("Loading wordclouds..."):

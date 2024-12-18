@@ -31,6 +31,7 @@ with st.sidebar:
     - [Data Source](#Data_Source)
     - [Methodology](#Methodology)
     - [Results](#Results)
+    - [Limitation](#Limitation)
 - <a href="https://github.com/Wh4130/dssq-bubble-tea">Github Repo</a>
 """, unsafe_allow_html = True)
 
@@ -97,11 +98,21 @@ st.divider()
 # *** Methodology
 st.header("Methodology", anchor = "Methodology")
 st.write("""
-- Tokenization
-- Topic Modeling (LDA / K-means)
-- Sentiment Analysis (KeyMoji)
-- Wordcloud
-- Simple Linear Regression (OLS)
+
+##### Tokenization
+We employed the **Jieba** Python module to tokenize the raw comment data. This tool is particularly suited for segmenting Mandarin text, ensuring precise tokenization for subsequent analysis.
+
+##### Topic Modeling
+To uncover underlying themes within the comment data, we applied two clustering algorithms: **Gensim LDA** and **Sklearn K-means**. After evaluating the results, we selected **K-means clustering** with \(k = 3\) as the optimal approach, as it demonstrated clearer topic separation and interpretability.
+
+##### Sentiment Analysis
+Sentiment analysis was conducted using the **KeyMoji** module, which allows customization of the content field to better suit domain-specific needs. By specifying the content field as **restaurant**, the model was tailored to detect sentiments more sensitively in the context of food and beverages.
+
+##### Keyword Analysis and Visualization
+To complement the quantitative analysis, we performed keyword analysis by visualizing token frequencies using the **WordCloud** Python package. This qualitative approach provided insights into prominent terms within the comment data.
+
+##### Hypothesis Testing
+For hypothesis testing, we utilized **Ordinary Least Squares (OLS)** regression to examine relationships and validate assumptions. This approach enabled a rigorous statistical analysis of the data.
 """)
 
 st.divider()
@@ -435,6 +446,14 @@ distance_to_mrt     0.0004          0.001
 # fig = px.bar(brands, 'brand', '服務態度_score', hover_data = ['shop count'])
 # fig.update_traces(marker = dict(color = '#E6DCB9'))
 # st.plotly_chart(fig)
+    
+# *** Limitation
+st.header("Limitation", anchor = "Limitation")
+st.write('''
+1. The dataset is limited to bubble tea shops located within a 1 km radius of MRT stations in Taipei and New Taipei City. Consequently, the findings may not fully represent shops in areas further from MRT stations or across the entire region.
+
+2. Due to variability in the number of comments per shop, we did not scrape all available reviews. Instead, we focused on the most recent comments by sorting and scrolling down the page 30 times for each shop.
+         ''')
     
 
 
